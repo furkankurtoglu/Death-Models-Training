@@ -100,7 +100,7 @@
 		<folder>output</folder> <!-- use . for root --> 
 
 		<full_data>
-			<interval units="min">360</interval>
+			<interval units="min">60</interval>
 			<enable>true</enable>
 		</full_data>
 		
@@ -120,8 +120,8 @@
 				<diffusion_coefficient units="micron^2/min">100000.0</diffusion_coefficient>
 				<decay_rate units="1/min">0.0</decay_rate>  
 			</physical_parameter_set>
-			<initial_condition units="mmHg">2.0</initial_condition>
-			<Dirichlet_boundary_condition units="mmHg" enabled="true">2.0</Dirichlet_boundary_condition>
+			<initial_condition units="mmHg">1.0</initial_condition>
+			<Dirichlet_boundary_condition units="mmHg" enabled="false">1.0</Dirichlet_boundary_condition>
 		</variable>
 		
 		<options>
@@ -136,8 +136,9 @@
 		
 		<!-- motile cell type parameters --> 
 		<initial_tumor_radius type="double" units="micrometer">50</initial_tumor_radius>
+		<distance_from_center type="double" units="micrometer">200</distance_from_center>
 		<cell_relative_adhesion type="double" units="dimensionless">0.05</cell_relative_adhesion>
-		<apoptosis_rate type="double" units="1/min">0.05</apoptosis_rate>
+		<apoptosis_rate type="double" units="1/min">0.0027777777777</apoptosis_rate>
 		
 	</user_parameters>
 	

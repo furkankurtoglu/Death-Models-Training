@@ -123,8 +123,9 @@ void create_cell_types( void )
 	int start_index = live.find_phase_index( PhysiCell_constants::live );
 	int end_index = live.find_phase_index( PhysiCell_constants::live );
 
-	// initially no necrosis 
+	// initially no necrosis and apoptosis
 	cell_defaults.phenotype.death.rates[necrosis_model_index] = 0.0; 
+	cell_defaults.phenotype.death.rates[apoptosis_model_index] = 0.0; 
 
 	// set oxygen uptake / secretion parameters for the default cell type 
 	cell_defaults.phenotype.secretion.uptake_rates[oxygen_substrate_index] = 0; 
@@ -142,7 +143,7 @@ void create_cell_types( void )
 	
 	apoptotic_cell = cell_defaults; 
 	apoptotic_cell.type = 1; 
-	apoptotic_cell.name = "apoptotic tumor cell"; 
+	apoptotic_cell.name = "apoptotic cell"; 
 	
 	// make sure the new cell type has its own reference phenotype
 	apoptotic_cell.parameters.pReference_live_phenotype = &( apoptotic_cell.phenotype ); 
@@ -160,6 +161,19 @@ void create_cell_types( void )
 	// Alter the transition rate from G0G1 state to S state
 	apoptotic_cell.phenotype.cycle.data.transition_rate(start_index,end_index) *= 0.0; // 0.1; 
 	
+	
+	// necrotic cell definitions
+	necrotic_cell = cell_defaults;
+	necrotic_cell.type = 2;
+	necrotic_cell.name = "necrotic cell";
+	necrotic_cell.parameters.pReference_live_phenotype = &( necrotic_cell.phenotype ); 
+	necrotic_cell.phenotype.motility.is_motile = false;	
+	// Set apoptosis to zero 
+	necrotic_cell.phenotype.death.rates[apoptosis_model_index] = 0;
+	// Set proliferation to 10% of other cells. 
+	// Alter the transition rate from G0G1 state to S state
+	necrotic_cell.phenotype.cycle.data.transition_rate(start_index,end_index) *= 0.0; // 0.1; 
+	necrotic_cell.functions.update_phenotype = update_cell_and_death_parameters_O2_based; 
 	return; 
 }
 
@@ -207,36 +221,6 @@ void setup_microenvironment( void )
 	return; 
 }
 
-std::vector<std::vector<double>> create_cell_sphere_positions(double cell_radius, double sphere_radius)
-{
-	std::vector<std::vector<double>> cells;
-	int xc=0,yc=0,zc=0;
-	double x_spacing= cell_radius*sqrt(3);
-	double y_spacing= cell_radius*2;
-	double z_spacing= cell_radius*sqrt(3);
-	
-	std::vector<double> tempPoint(3,0.0);
-	// std::vector<double> cylinder_center(3,0.0);
-	
-	for(double z=-sphere_radius;z<sphere_radius;z+=z_spacing, zc++)
-	{
-		for(double x=-sphere_radius;x<sphere_radius;x+=x_spacing, xc++)
-		{
-			for(double y=-sphere_radius;y<sphere_radius;y+=y_spacing, yc++)
-			{
-				tempPoint[0]=x + (zc%2) * 0.5 * cell_radius;
-				tempPoint[1]=y + (xc%2) * cell_radius;
-				tempPoint[2]=z;
-				
-				if(sqrt(norm_squared(tempPoint))< sphere_radius)
-				{ cells.push_back(tempPoint); }
-			}
-			
-		}
-	}
-	return cells;
-	
-}
 
 void setup_tissue( void )
 {
@@ -245,18 +229,29 @@ void setup_tissue( void )
 	Cell* pCell;
 	
 	double cell_radius = cell_defaults.phenotype.geometry.radius; 
-	double cell_spacing = 0.95 * 2.0 * cell_radius; 
+	double cell_spacing = 0.8 * 2.0 * cell_radius; 
 	double initial_tumor_radius =  parameters.doubles("initial_tumor_radius");
+	double distance_from_center =  parameters.doubles("distance_from_center");
 	
-	std::vector<std::vector<double>> positions = create_cell_sphere_positions(cell_radius,initial_tumor_radius); 
+	std::vector<std::vector<double>> positions = create_cell_circle_positions(cell_radius,initial_tumor_radius); 
 	std::cout << "creating " << positions.size() << " closely-packed cells ... " << std::endl; 
 	// create organoid
 	for( int i=0; i < positions.size(); i++ )
 	{
-		positions[i][0] = -200;
+		positions[i][0] = positions[i][0]-distance_from_center;
 		pCell = create_cell(apoptotic_cell);
 		pCell->assign_position( positions[i] );
+		
 	}
+
+	for( int i=0; i < positions.size(); i++ )
+	{
+		positions[i][0] = positions[i][0]+distance_from_center;
+		pCell = create_cell(necrotic_cell);
+		pCell->assign_position( positions[i] );
+		
+	}
+	
 	
 	return; 
 }
@@ -269,11 +264,39 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 		
 	if( pCell->phenotype.death.dead == false && pCell->type == 1 )
 	{
-		 output[0] = "black"; 
-		 output[2] = "black"; 
+		 output[0] = "blue"; 
+		 output[2] = "darkblue"; 
 	}
 	
+	if( pCell->phenotype.death.dead == false && pCell->type == 2 )
+	{
+		 output[0] = "red"; 
+		 output[2] = "darkred"; 
+	}
 	return output; 
 }
 
 
+std::vector<std::vector<double>> create_cell_circle_positions(double cell_radius, double sphere_radius)
+{
+	std::vector<std::vector<double>> cells;
+	int xc=0,yc=0,zc=0;
+	double x_spacing= cell_radius*sqrt(3);
+	double y_spacing= cell_radius*sqrt(3);
+
+	std::vector<double> tempPoint(3,0.0);
+	// std::vector<double> cylinder_center(3,0.0);
+	
+	for(double x=-sphere_radius;x<sphere_radius;x+=x_spacing, xc++)
+	{
+		for(double y=-sphere_radius;y<sphere_radius;y+=y_spacing, yc++)
+		{
+			tempPoint[1]=y + (xc%2) * cell_radius;
+			tempPoint[0]=x;
+			tempPoint[2]=0;
+			if(sqrt(norm_squared(tempPoint))< sphere_radius)
+			{ cells.push_back(tempPoint); }
+		}
+	}
+	return cells;
+}

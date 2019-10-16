@@ -90,4 +90,4 @@ void setup_microenvironment( void );
 
 // custom pathology coloring function 
 std::vector<std::string> my_coloring_function( Cell* );
-std::vector<std::vector<double>> create_cell_sphere_positions(double cell_radius, double sphere_radius);
+std::vector<std::vector<double>> create_cell_circle_positions(double cell_radius, double sphere_radius);
