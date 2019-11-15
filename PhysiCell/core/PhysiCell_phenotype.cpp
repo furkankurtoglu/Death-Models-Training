@@ -368,8 +368,8 @@ Death_Parameters::Death_Parameters()
 	time_units = "min"; 
 	
 	// reference values: MCF-7 (1/min)
-	unlysed_fluid_change_rate = 3.0/60.0; // apoptosis 
-	lysed_fluid_change_rate = 0.05/60.0; // lysed necrotic cell 
+	unlysed_fluid_change_rate = parameters.doubles("unlysed_fluid_change_rate"); // apoptosis 
+	lysed_fluid_change_rate = parameters.doubles("lysed_fluid_change_rate"); // lysed necrotic cell 
 	
 	cytoplasmic_biomass_change_rate = 1.0/60.0; // apoptosis 
 	nuclear_biomass_change_rate = 0.35/60.0; // apoptosis 

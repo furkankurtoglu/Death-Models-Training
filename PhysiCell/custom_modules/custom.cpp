@@ -231,27 +231,34 @@ void setup_tissue( void )
 	double cell_radius = cell_defaults.phenotype.geometry.radius; 
 	double cell_spacing = 0.8 * 2.0 * cell_radius; 
 	double initial_tumor_radius =  parameters.doubles("initial_tumor_radius");
-	double distance_from_center =  parameters.doubles("distance_from_center");
+	double type_of_death_model = parameters.doubles("type_of_death_model");
 	
-	std::vector<std::vector<double>> positions = create_cell_circle_positions(cell_radius,initial_tumor_radius); 
-	std::cout << "creating " << positions.size() << " closely-packed cells ... " << std::endl; 
-	// create organoid
-	for( int i=0; i < positions.size(); i++ )
-	{
-		positions[i][0] = positions[i][0]-distance_from_center;
-		pCell = create_cell(apoptotic_cell);
-		pCell->assign_position( positions[i] );
-		
-	}
-
-	for( int i=0; i < positions.size(); i++ )
-	{
-		positions[i][0] = positions[i][0]+distance_from_center;
-		pCell = create_cell(necrotic_cell);
-		pCell->assign_position( positions[i] );
-		
-	}
+	std::vector<std::vector<double>> positions = create_cell_circle_positions(cell_radius,initial_tumor_radius);
 	
+	std::cout << type_of_death_model << std::endl;
+	
+	if (type_of_death_model == 1)
+	{
+		std::cout << " creating apoptotic cells" << std::endl;
+		for( int i=0; i < positions.size(); i++ )
+		{
+			pCell = create_cell(apoptotic_cell);
+			pCell->assign_position( positions[i] );
+		}
+	}
+	else if ( type_of_death_model == 2)
+	{
+		std::cout << " creating necrotic cells" << std::endl;
+		for( int i=0; i < positions.size(); i++ )
+		{
+			pCell = create_cell(necrotic_cell);
+			pCell->assign_position( positions[i] );
+		}
+	}
+	else
+	{
+		std::cout << "Non-sense parameter has been entered!" << std::endl;
+	}
 	
 	return; 
 }

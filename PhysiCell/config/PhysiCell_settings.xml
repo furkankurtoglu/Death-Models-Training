@@ -93,7 +93,7 @@
 	</overall>
 	
 	<parallel>
-		<omp_num_threads>4</omp_num_threads>
+		<omp_num_threads>6</omp_num_threads>
 	</parallel> 
 	
 	<save>
@@ -133,12 +133,12 @@
 	<user_parameters>
 		<random_seed type="int" units="dimensionless">0</random_seed> 
 		<!-- example parameters from the template --> 
-		
-		<!-- motile cell type parameters --> 
-		<initial_tumor_radius type="double" units="micrometer">50</initial_tumor_radius>
-		<distance_from_center type="double" units="micrometer">200</distance_from_center>
+		<type_of_death_model type="double" units="micrometer" description="1->apoptosis 2->necrosis">1</type_of_death_model>
+		<initial_tumor_radius type="double" units="micrometer">150</initial_tumor_radius>
 		<cell_relative_adhesion type="double" units="dimensionless">0.05</cell_relative_adhesion>
-		<apoptosis_rate type="double" units="1/min">0.0027777777777</apoptosis_rate>
+		<apoptosis_rate type="double" units="1/min">0.0014</apoptosis_rate>
+		<lysed_fluid_change_rate type="double" units="1/min">0.00083333333</lysed_fluid_change_rate> <!-- 0.05/60.0-->
+		<unlysed_fluid_change_rate type="double" units="1/min">0.00000001</unlysed_fluid_change_rate> <!-- 3.0/60.0-->
 		
 	</user_parameters>
 	
