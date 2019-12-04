@@ -87,7 +87,7 @@
 	</domain>
 	
 	<overall>
-		<max_time units="min">7200</max_time> <!-- 5 days * 24 h * 60 min -->
+		<max_time units="min">3600</max_time> 
 		<time_units>min</time_units>
 		<space_units>micron</space_units>
 	</overall>
@@ -137,9 +137,10 @@
 		<initial_tumor_radius type="double" units="micrometer">150</initial_tumor_radius>
 		<cell_relative_adhesion type="double" units="dimensionless">0.05</cell_relative_adhesion>
 		<apoptosis_rate type="double" units="1/min">0.0014</apoptosis_rate>
-		<lysed_fluid_change_rate type="double" units="1/min">0.00083333333</lysed_fluid_change_rate> <!-- 0.05/60.0-->
-		<unlysed_fluid_change_rate type="double" units="1/min">0.00000001</unlysed_fluid_change_rate> <!-- 3.0/60.0-->
-		
+		<lysed_fluid_change_rate type="double" units="1/min">0.00083333333</lysed_fluid_change_rate> <!-- necrotic 0.05/60.0--> 
+		<unlysed_fluid_change_rate type="double" units="1/min">0.00000001</unlysed_fluid_change_rate> <!-- apoptosis 3.0/60.0-->
+		<cytoplasmic_biomass_change_rate type="double" units="1/min">0.01666666666</cytoplasmic_biomass_change_rate> <!-- apoptosis 1.0/60.0-->
+		<nuclear_biomass_change_rate type="double" units="1/min">0.00583333333</nuclear_biomass_change_rate> <!-- apoptosis 0.35/60.0-->
 	</user_parameters>
 	
 </PhysiCell_settings>

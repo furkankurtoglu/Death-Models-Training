@@ -156,6 +156,10 @@ void create_cell_types( void )
 	
 	// Set apoptosis to zero 
 	apoptotic_cell.phenotype.death.rates[apoptosis_model_index] = parameters.doubles( "apoptosis_rate" );
+	//apoptotic_cell.phenotype.death.current_parameters().unlysed_fluid_change_rate = parameters.doubles("unlysed_fluid_change_rate"); // apoptosis 
+	//apoptotic_cell.phenotype.death.current_parameters().cytoplasmic_biomass_change_rate = parameters.doubles("cytoplasmic_biomass_change_rate"); // apoptosis 
+	//apoptotic_cell.phenotype.death.current_parameters().nuclear_biomass_change_rate = parameters.doubles("nuclear_biomass_change_rate"); // apoptosis 
+
 
 	// Set proliferation to 10% of other cells. 
 	// Alter the transition rate from G0G1 state to S state
@@ -174,6 +178,9 @@ void create_cell_types( void )
 	// Alter the transition rate from G0G1 state to S state
 	necrotic_cell.phenotype.cycle.data.transition_rate(start_index,end_index) *= 0.0; // 0.1; 
 	necrotic_cell.functions.update_phenotype = update_cell_and_death_parameters_O2_based; 
+	necrotic_cell.phenotype.death.current_parameters().lysed_fluid_change_rate = parameters.doubles("lysed_fluid_change_rate"); // lysed necrotic cell
+	
+	
 	return; 
 }
 
@@ -264,9 +271,7 @@ void setup_tissue( void )
 }
 
 std::vector<std::string> my_coloring_function( Cell* pCell )
-{
-	// start with flow cytometry coloring 
-	
+{	
 	std::vector<std::string> output = false_cell_coloring_cytometry(pCell); 
 		
 	if( pCell->phenotype.death.dead == false && pCell->type == 1 )
@@ -277,8 +282,8 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 	
 	if( pCell->phenotype.death.dead == false && pCell->type == 2 )
 	{
-		 output[0] = "red"; 
-		 output[2] = "darkred"; 
+		 output[0] = "green"; 
+		 output[2] = "darkgreen"; 
 	}
 	return output; 
 }
