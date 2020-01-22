@@ -133,7 +133,6 @@ void create_cell_types( void )
 	cell_defaults.phenotype.secretion.saturation_densities[oxygen_substrate_index] = 0; 
 	
 	// add custom data here, if any 
-	
 
 	// Now, let's define another cell type. 
 	// It's best to just copy the default and modify it. 
@@ -156,10 +155,10 @@ void create_cell_types( void )
 	
 	// Set apoptosis to zero 
 	apoptotic_cell.phenotype.death.rates[apoptosis_model_index] = parameters.doubles( "apoptosis_rate" );
-	//apoptotic_cell.phenotype.death.current_parameters().unlysed_fluid_change_rate = parameters.doubles("unlysed_fluid_change_rate"); // apoptosis 
-	//apoptotic_cell.phenotype.death.current_parameters().cytoplasmic_biomass_change_rate = parameters.doubles("cytoplasmic_biomass_change_rate"); // apoptosis 
-	//apoptotic_cell.phenotype.death.current_parameters().nuclear_biomass_change_rate = parameters.doubles("nuclear_biomass_change_rate"); // apoptosis 
-
+	apoptotic_cell.phenotype.death.current_parameters().unlysed_fluid_change_rate = parameters.doubles("unlysed_fluid_change_rate"); // apoptosis 
+	apoptotic_cell.phenotype.death.current_parameters().cytoplasmic_biomass_change_rate = parameters.doubles("cytoplasmic_biomass_change_rate"); // apoptosis 
+	apoptotic_cell.phenotype.death.current_parameters().nuclear_biomass_change_rate = parameters.doubles("nuclear_biomass_change_rate"); // apoptosis 
+	apoptotic_cell.phenotype.death.current_parameters().lysed_fluid_change_rate = parameters.doubles("lysed_fluid_change_rate"); // lysed necrotic cell
 
 	// Set proliferation to 10% of other cells. 
 	// Alter the transition rate from G0G1 state to S state
@@ -178,8 +177,12 @@ void create_cell_types( void )
 	// Alter the transition rate from G0G1 state to S state
 	necrotic_cell.phenotype.cycle.data.transition_rate(start_index,end_index) *= 0.0; // 0.1; 
 	necrotic_cell.functions.update_phenotype = update_cell_and_death_parameters_O2_based; 
+	necrotic_cell.phenotype.death.current_parameters().unlysed_fluid_change_rate = parameters.doubles("unlysed_fluid_change_rate"); // apoptosis 
+	necrotic_cell.phenotype.death.current_parameters().cytoplasmic_biomass_change_rate = parameters.doubles("cytoplasmic_biomass_change_rate"); // apoptosis 
+	necrotic_cell.phenotype.death.current_parameters().nuclear_biomass_change_rate = parameters.doubles("nuclear_biomass_change_rate"); // apoptosis 
 	necrotic_cell.phenotype.death.current_parameters().lysed_fluid_change_rate = parameters.doubles("lysed_fluid_change_rate"); // lysed necrotic cell
-	
+	necrotic_cell.parameters.o2_necrosis_threshold = parameters.doubles("o2_necrosis_threshold");
+	necrotic_cell.parameters.o2_necrosis_max = parameters.doubles("o2_necrosis_max");
 	
 	return; 
 }
@@ -242,11 +245,11 @@ void setup_tissue( void )
 	
 	std::vector<std::vector<double>> positions = create_cell_circle_positions(cell_radius,initial_tumor_radius);
 	
-	std::cout << type_of_death_model << std::endl;
+
 	
 	if (type_of_death_model == 1)
 	{
-		std::cout << " creating apoptotic cells" << std::endl;
+		std::cout << "Creating apoptotic cells" << std::endl;
 		for( int i=0; i < positions.size(); i++ )
 		{
 			pCell = create_cell(apoptotic_cell);
@@ -255,7 +258,7 @@ void setup_tissue( void )
 	}
 	else if ( type_of_death_model == 2)
 	{
-		std::cout << " creating necrotic cells" << std::endl;
+		std::cout << "Creating necrotic cells" << std::endl;
 		for( int i=0; i < positions.size(); i++ )
 		{
 			pCell = create_cell(necrotic_cell);
@@ -276,8 +279,14 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 		
 	if( pCell->phenotype.death.dead == false && pCell->type == 1 )
 	{
-		 output[0] = "blue"; 
-		 output[2] = "darkblue"; 
+		 output[0] = "lightblue"; 
+		 output[2] = "blue"; 
+	}
+	
+	if( pCell->phenotype.death.dead == true && pCell->type == 1 )
+	{
+		 output[0] = "orange"; 
+		 output[2] = "brown"; 
 	}
 	
 	if( pCell->phenotype.death.dead == false && pCell->type == 2 )
@@ -285,6 +294,7 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 		 output[0] = "green"; 
 		 output[2] = "darkgreen"; 
 	}
+	
 	return output; 
 }
 
