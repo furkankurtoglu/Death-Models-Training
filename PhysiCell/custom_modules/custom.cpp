@@ -153,16 +153,13 @@ void create_cell_types( void )
 	// Set cell-cell adhesion to 5% of other cells 
 	apoptotic_cell.phenotype.mechanics.cell_cell_adhesion_strength *= parameters.doubles( "cell_relative_adhesion" ); // 0.05; 
 	
-	// Set apoptosis to zero 
+	// Set apoptosis to user paramter
 	apoptotic_cell.phenotype.death.rates[apoptosis_model_index] = parameters.doubles( "apoptosis_rate" );
 	apoptotic_cell.phenotype.death.current_parameters().unlysed_fluid_change_rate = parameters.doubles("unlysed_fluid_change_rate"); // apoptosis 
 	apoptotic_cell.phenotype.death.current_parameters().cytoplasmic_biomass_change_rate = parameters.doubles("cytoplasmic_biomass_change_rate"); // apoptosis 
 	apoptotic_cell.phenotype.death.current_parameters().nuclear_biomass_change_rate = parameters.doubles("nuclear_biomass_change_rate"); // apoptosis 
 	apoptotic_cell.phenotype.death.current_parameters().lysed_fluid_change_rate = parameters.doubles("lysed_fluid_change_rate"); // lysed necrotic cell
-
-	// Set proliferation to 10% of other cells. 
-	// Alter the transition rate from G0G1 state to S state
-	apoptotic_cell.phenotype.cycle.data.transition_rate(start_index,end_index) *= 0.0; // 0.1; 
+	apoptotic_cell.phenotype.cycle.data.transition_rate(start_index,end_index) *= 0.0;
 	
 	
 	// necrotic cell definitions
@@ -172,11 +169,10 @@ void create_cell_types( void )
 	necrotic_cell.parameters.pReference_live_phenotype = &( necrotic_cell.phenotype ); 
 	necrotic_cell.phenotype.motility.is_motile = false;	
 	// Set apoptosis to zero 
-	necrotic_cell.phenotype.death.rates[apoptosis_model_index] = 0;
-	// Set proliferation to 10% of other cells. 
-	// Alter the transition rate from G0G1 state to S state
-	necrotic_cell.phenotype.cycle.data.transition_rate(start_index,end_index) *= 0.0; // 0.1; 
+	necrotic_cell.phenotype.death.rates[apoptosis_model_index] = 0.0;
+	necrotic_cell.phenotype.cycle.data.transition_rate(start_index,end_index) *= 0.0;
 	necrotic_cell.functions.update_phenotype = update_cell_and_death_parameters_O2_based; 
+	necrotic_cell.parameters.max_necrosis_rate = parameters.doubles( "necrosis_rate" );
 	necrotic_cell.phenotype.death.current_parameters().unlysed_fluid_change_rate = parameters.doubles("unlysed_fluid_change_rate"); // apoptosis 
 	necrotic_cell.phenotype.death.current_parameters().cytoplasmic_biomass_change_rate = parameters.doubles("cytoplasmic_biomass_change_rate"); // apoptosis 
 	necrotic_cell.phenotype.death.current_parameters().nuclear_biomass_change_rate = parameters.doubles("nuclear_biomass_change_rate"); // apoptosis 
@@ -293,6 +289,12 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 	{
 		 output[0] = "green"; 
 		 output[2] = "darkgreen"; 
+	}
+
+	if( pCell->phenotype.death.dead == true && pCell->type == 2 )
+	{
+		 output[0] = "pink"; 
+		 output[2] = "purple"; 
 	}
 	
 	return output; 
