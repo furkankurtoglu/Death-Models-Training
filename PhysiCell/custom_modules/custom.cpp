@@ -131,6 +131,8 @@ void create_cell_types( void )
 	cell_defaults.phenotype.secretion.uptake_rates[oxygen_substrate_index] = 0; 
 	cell_defaults.phenotype.secretion.secretion_rates[oxygen_substrate_index] = 0; 
 	cell_defaults.phenotype.secretion.saturation_densities[oxygen_substrate_index] = 0; 
+	cell_defaults.phenotype.volume.rupture_volume=parameters.doubles( "rupture_volume" );
+	
 	
 	// add custom data here, if any 
 
@@ -173,13 +175,29 @@ void create_cell_types( void )
 	necrotic_cell.phenotype.cycle.data.transition_rate(start_index,end_index) *= 0.0;
 	necrotic_cell.functions.update_phenotype = update_cell_and_death_parameters_O2_based; 
 	necrotic_cell.parameters.max_necrosis_rate = parameters.doubles( "necrosis_rate" );
+	double necrosis_type = parameters.doubles( "necrosis_type" );
+	if ( necrosis_type == 1)
+	{
+		necrotic_cell.parameters.necrosis_type = PhysiCell_constants::deterministic_necrosis;;
+	}
+	else if ( necrosis_type == 2)
+	{
+		necrotic_cell.parameters.necrosis_type = PhysiCell_constants::stochastic_necrosis;;
+	}
+	else
+	{
+		std::cout << "Non-sense parameter has been entered! As a default, apoptotic cells are seeded." << std::endl;
+		std::cout << "Seeding deterministic necrosis" << std::endl;
+		necrotic_cell.parameters.necrosis_type = PhysiCell_constants::deterministic_necrosis;;
+	}
+
 	necrotic_cell.phenotype.death.current_parameters().unlysed_fluid_change_rate = parameters.doubles("unlysed_fluid_change_rate"); // apoptosis 
 	necrotic_cell.phenotype.death.current_parameters().cytoplasmic_biomass_change_rate = parameters.doubles("cytoplasmic_biomass_change_rate"); // apoptosis 
 	necrotic_cell.phenotype.death.current_parameters().nuclear_biomass_change_rate = parameters.doubles("nuclear_biomass_change_rate"); // apoptosis 
 	necrotic_cell.phenotype.death.current_parameters().lysed_fluid_change_rate = parameters.doubles("lysed_fluid_change_rate"); // lysed necrotic cell
 	necrotic_cell.parameters.o2_necrosis_threshold = parameters.doubles("o2_necrosis_threshold");
 	necrotic_cell.parameters.o2_necrosis_max = parameters.doubles("o2_necrosis_max");
-	
+	necrotic_cell.phenotype.volume.relative_rupture_volume=parameters.doubles( "relative_rupture_volume");
 	return; 
 }
 
@@ -263,7 +281,13 @@ void setup_tissue( void )
 	}
 	else
 	{
-		std::cout << "Non-sense parameter has been entered!" << std::endl;
+		std::cout << "Non-sense parameter has been entered! As a default, apoptotic cells are seeded." << std::endl;
+		std::cout << "Creating apoptotic cells" << std::endl;
+		for( int i=0; i < positions.size(); i++ )
+		{
+			pCell = create_cell(apoptotic_cell);
+			pCell->assign_position( positions[i] );
+		}
 	}
 	
 	return; 
@@ -281,8 +305,8 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 	
 	if( pCell->phenotype.death.dead == true && pCell->type == 1 )
 	{
-		 output[0] = "orange"; 
-		 output[2] = "brown"; 
+		 output[0] = "pink"; 
+		 output[2] = "purple"; 
 	}
 	
 	if( pCell->phenotype.death.dead == false && pCell->type == 2 )
@@ -291,11 +315,11 @@ std::vector<std::string> my_coloring_function( Cell* pCell )
 		 output[2] = "darkgreen"; 
 	}
 
-	if( pCell->phenotype.death.dead == true && pCell->type == 2 )
+/* 	if( pCell->phenotype.death.dead == true && pCell->type == 2 )
 	{
 		 output[0] = "pink"; 
 		 output[2] = "purple"; 
-	}
+	} */
 	
 	return output; 
 }
