@@ -134,7 +134,7 @@
 		<random_seed type="int" units="dimensionless" hidden="true">0</random_seed> 
 		
 		<!-- example parameters from the template --> 
-		<type_of_death_model type="double" units='' description="1->apoptosis 2->necrosis">1</type_of_death_model>
+		<type_of_death_model type="double" units='' description="1->apoptosis 2->necrosis">2</type_of_death_model>
 		<initial_tumor_radius type="double" units="micrometer" description="initial tumor radius">150</initial_tumor_radius>
 		<cell_relative_adhesion type="double" units="dimensionless" hidden="true" >0.05</cell_relative_adhesion> <!--0.05-->
 

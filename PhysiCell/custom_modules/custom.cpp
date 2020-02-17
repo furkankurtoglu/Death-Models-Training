@@ -173,23 +173,9 @@ void create_cell_types( void )
 	// Set apoptosis to zero 
 	necrotic_cell.phenotype.death.rates[apoptosis_model_index] = 0.0;
 	necrotic_cell.phenotype.cycle.data.transition_rate(start_index,end_index) *= 0.0;
-	necrotic_cell.functions.update_phenotype = update_cell_and_death_parameters_O2_based; 
+	necrotic_cell.functions.update_phenotype = oxygen_based_necrosis_death; 
 	necrotic_cell.parameters.max_necrosis_rate = parameters.doubles( "necrosis_rate" );
-	double necrosis_type = parameters.doubles( "necrosis_type" );
-	if ( necrosis_type == 1)
-	{
-		necrotic_cell.parameters.necrosis_type = PhysiCell_constants::deterministic_necrosis;;
-	}
-	else if ( necrosis_type == 2)
-	{
-		necrotic_cell.parameters.necrosis_type = PhysiCell_constants::stochastic_necrosis;;
-	}
-	else
-	{
-		std::cout << "Non-sense parameter has been entered! As a default, apoptotic cells are seeded." << std::endl;
-		std::cout << "Seeding deterministic necrosis" << std::endl;
-		necrotic_cell.parameters.necrosis_type = PhysiCell_constants::deterministic_necrosis;;
-	}
+
 
 	necrotic_cell.phenotype.death.current_parameters().unlysed_fluid_change_rate = parameters.doubles("unlysed_fluid_change_rate"); // apoptosis 
 	necrotic_cell.phenotype.death.current_parameters().cytoplasmic_biomass_change_rate = parameters.doubles("cytoplasmic_biomass_change_rate"); // apoptosis 
@@ -347,4 +333,88 @@ std::vector<std::vector<double>> create_cell_circle_positions(double cell_radius
 		}
 	}
 	return cells;
+}
+
+
+void oxygen_based_necrosis_death( Cell* pCell, Phenotype& phenotype, double dt )
+{
+	// supported cycle models:
+		// advanced_Ki67_cycle_model= 0;
+		// basic_Ki67_cycle_model=1
+		// live_cells_cycle_model = 5; 
+	
+	if( phenotype.death.dead == true )
+	{ return; }
+	
+	// set up shortcuts to find the Q and K(1) phases (assuming Ki67 basic or advanced model)
+	static bool indices_initiated = false; 
+	static int start_phase_index; // Q_phase_index; 
+	static int end_phase_index; // K_phase_index;
+	static int necrosis_index; 
+	
+	static int oxygen_substrate_index = pCell->get_microenvironment()->find_density_index( "oxygen" ); 
+	double pO2 = (pCell->nearest_density_vector())[oxygen_substrate_index];
+    
+    double necrosis_type = parameters.doubles( "necrosis_type" );
+	if ( necrosis_type == 1)
+	{
+    if( pO2 < pCell->parameters.o2_proliferation_threshold );
+    {
+        pCell->phenotype.death.rates[necrosis_index] = pCell->parameters.max_necrosis_rate;
+    }
+		
+	}
+	else if ( necrosis_type == 2)
+	{
+    if( indices_initiated == false )
+	{
+
+	
+	// this multiplier is for linear interpolation of the oxygen value 
+	double multiplier = 1.0;
+	if( pO2 < pCell->parameters.o2_proliferation_saturation )
+	{
+		multiplier = ( pO2 - pCell->parameters.o2_proliferation_threshold ) 
+			/ ( pCell->parameters.o2_proliferation_saturation - pCell->parameters.o2_proliferation_threshold );
+	}
+	if( pO2 < pCell->parameters.o2_proliferation_threshold )
+	{ 
+		multiplier = 0.0; 
+	}
+	
+	// now, update the appropriate cycle transition rate 
+	
+	phenotype.cycle.data.transition_rate(start_phase_index,end_phase_index) = multiplier * 
+		pCell->parameters.pReference_live_phenotype->cycle.data.transition_rate(start_phase_index,end_phase_index);
+	
+	// Update necrosis rate
+	multiplier = 0.0;
+	if( pO2 < pCell->parameters.o2_necrosis_threshold )
+	{
+		multiplier = ( pCell->parameters.o2_necrosis_threshold - pO2 ) 
+			/ ( pCell->parameters.o2_necrosis_threshold - pCell->parameters.o2_necrosis_max );
+	}
+	if( pO2 < pCell->parameters.o2_necrosis_max )
+	{ 
+		multiplier = 1.0; 
+	}	
+	
+	// now, update the necrosis rate 
+	
+	pCell->phenotype.death.rates[necrosis_index] = multiplier * pCell->parameters.max_necrosis_rate; 
+	
+	}
+	else
+	{
+		std::cout << "Non-sense parameter has been entered! As a default, apoptotic cells are seeded." << std::endl;
+		std::cout << "Seeding deterministic necrosis" << std::endl;
+		necrotic_cell.parameters.necrosis_type = PhysiCell_constants::deterministic_necrosis;;
+	}
+    
+    
+    
+    }
+    
+	
+	return; 
 }
