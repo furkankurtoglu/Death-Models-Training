@@ -706,7 +706,6 @@ void update_cell_and_death_parameters_O2_based( Cell* pCell, Phenotype& phenotyp
 		// basic_Ki67_cycle_model=1
 		// live_cells_cycle_model = 5; 
 	
-    std::cout << PhysiCell_constants::deterministic_necrosis << std::endl;
 	if( phenotype.death.dead == true )
 	{ return; }
 	
@@ -803,6 +802,20 @@ void update_cell_and_death_parameters_O2_based( Cell* pCell, Phenotype& phenotyp
 	
 	// Update necrosis rate
 	multiplier = 0.0;
+
+    // necrosis Type
+    double type_of_necrosis = pCell->parameters.necrosis_type;
+    
+    if (type_of_necrosis == 0) // deterministic necrosis
+    {
+    if( pO2 < pCell->parameters.o2_necrosis_threshold )
+	{
+        // if they are in below o2_necrosis_threshold, cells instantly become necrotic
+        pCell->phenotype.death.rates[necrosis_index] = 99e99;
+    }
+    }
+    else if (type_of_necrosis == 1) // stochastic necrosis
+    { 
 	if( pO2 < pCell->parameters.o2_necrosis_threshold )
 	{
 		multiplier = ( pCell->parameters.o2_necrosis_threshold - pO2 ) 
@@ -814,9 +827,9 @@ void update_cell_and_death_parameters_O2_based( Cell* pCell, Phenotype& phenotyp
 	}	
 	
 	// now, update the necrosis rate 
-	
-	pCell->phenotype.death.rates[necrosis_index] = multiplier * pCell->parameters.max_necrosis_rate; 
-	
+	    pCell->phenotype.death.rates[necrosis_index] = multiplier * pCell->parameters.max_necrosis_rate; 
+	}
+
 	return; 
 }
 

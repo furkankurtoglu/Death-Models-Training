@@ -183,7 +183,20 @@ void create_cell_types( void )
 	necrotic_cell.phenotype.death.current_parameters().lysed_fluid_change_rate = parameters.doubles("lysed_fluid_change_rate"); // lysed necrotic cell
 	necrotic_cell.parameters.o2_necrosis_threshold = parameters.doubles("o2_necrosis_threshold");
 	necrotic_cell.parameters.o2_necrosis_max = parameters.doubles("o2_necrosis_max");
-    necrotic_cell.parameters.necrosis_type = PhysiCell_constants::stochastic_necrosis;;;
+    double necrosis_type = parameters.doubles("necrosis_type");
+    if  (necrosis_type == 1)
+    {
+    necrotic_cell.parameters.necrosis_type = PhysiCell_constants::deterministic_necrosis;
+    }
+    else if ( necrosis_type == 2)
+    {
+    necrotic_cell.parameters.necrosis_type = PhysiCell_constants::stochastic_necrosis;
+    }
+    else
+	{
+    std::cout << "Wrong parameter has been entered for necrosis type! As a default, necrosis is set as stochastic." << std::endl;
+    necrotic_cell.parameters.necrosis_type = PhysiCell_constants::stochastic_necrosis;;
+	}
 	necrotic_cell.phenotype.volume.relative_rupture_volume=parameters.doubles( "relative_rupture_volume");
 	return; 
 }
@@ -264,11 +277,12 @@ void setup_tissue( void )
 		{
 			pCell = create_cell(necrotic_cell);
 			pCell->assign_position( positions[i] );
+            //std::cout << pCell->parameters.necrosis_type << std::endl;
 		}
 	}
 	else
 	{
-		std::cout << "Non-sense parameter has been entered! As a default, apoptotic cells are seeded." << std::endl;
+		std::cout << "Wrong parameter has been entered for type of death model! As a default, apoptotic cells are seeded." << std::endl;
 		std::cout << "Creating apoptotic cells" << std::endl;
 		for( int i=0; i < positions.size(); i++ )
 		{
