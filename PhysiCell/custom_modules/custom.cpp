@@ -173,7 +173,7 @@ void create_cell_types( void )
 	// Set apoptosis to zero 
 	necrotic_cell.phenotype.death.rates[apoptosis_model_index] = 0.0;
 	necrotic_cell.phenotype.cycle.data.transition_rate(start_index,end_index) *= 0.0;
-	necrotic_cell.functions.update_phenotype = oxygen_based_necrosis_death; 
+	necrotic_cell.functions.update_phenotype = update_cell_and_death_parameters_O2_based; 
 	necrotic_cell.parameters.max_necrosis_rate = parameters.doubles( "necrosis_rate" );
 
 
@@ -183,6 +183,7 @@ void create_cell_types( void )
 	necrotic_cell.phenotype.death.current_parameters().lysed_fluid_change_rate = parameters.doubles("lysed_fluid_change_rate"); // lysed necrotic cell
 	necrotic_cell.parameters.o2_necrosis_threshold = parameters.doubles("o2_necrosis_threshold");
 	necrotic_cell.parameters.o2_necrosis_max = parameters.doubles("o2_necrosis_max");
+    necrotic_cell.parameters.necrosis_type = PhysiCell_constants::stochastic_necrosis;;;
 	necrotic_cell.phenotype.volume.relative_rupture_volume=parameters.doubles( "relative_rupture_volume");
 	return; 
 }

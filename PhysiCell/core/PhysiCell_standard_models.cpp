@@ -706,6 +706,7 @@ void update_cell_and_death_parameters_O2_based( Cell* pCell, Phenotype& phenotyp
 		// basic_Ki67_cycle_model=1
 		// live_cells_cycle_model = 5; 
 	
+    std::cout << PhysiCell_constants::deterministic_necrosis << std::endl;
 	if( phenotype.death.dead == true )
 	{ return; }
 	

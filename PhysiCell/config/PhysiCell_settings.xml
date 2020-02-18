@@ -140,7 +140,7 @@
 
 		<apoptosis_rate type="double" units="1/min" description="mean apoptosis rate">0.00014</apoptosis_rate> <!--0.0014-->
 		<necrosis_rate type="double" units="1/min" description="mean necrosis rate">0.00277777777</necrosis_rate> <!-- 1.0 / (6.0 * 60.0) = 0.00277777777-->
-		<necrosis_type type="double" units='' description="1->deterministic 2->stochastic">1</necrosis_type>
+		<necrosis_type type="double" units='' description="1->deterministic 2->stochastic">2</necrosis_type>
 		
 		<rupture_volume type="double" units="1/min" description="volume at which a cell will burst or lyse">4988</rupture_volume> <!-- 4988 cubic-micron --> 
 		<relative_rupture_volume type="double" units="1/min" description="relative_rupture_volume">2.0</relative_rupture_volume> <!-- 2.0 --> 
